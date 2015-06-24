@@ -32,7 +32,8 @@
 enum {
     FIRST_AVIL_IOCTL_FUNC = 0x800,
     QXL_GET_INFO_FUNC = FIRST_AVIL_IOCTL_FUNC,
-    QXL_SET_CUSTOM_DISPLAY
+    QXL_SET_CUSTOM_DISPLAY,
+    QXL_SET_MONITOR_CONFIG
 };
 
 #define IOCTL_QXL_GET_INFO \
@@ -109,6 +110,7 @@ typedef struct QXLDriverInfo {
     PUCHAR memslot_add_port;
     PUCHAR memslot_del_port;
     PUCHAR destroy_all_surfaces_port;
+    PUCHAR monitors_config_port;
 
     UCHAR  pci_revision;
 
@@ -121,6 +123,8 @@ typedef struct QXLDriverInfo {
     UINT64 fb_phys;
 
     UINT8 create_non_primary_surfaces;
+
+    QXLPHYSICAL * monitors_config;
 } QXLDriverInfo;
 
 #endif

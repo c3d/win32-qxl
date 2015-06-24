@@ -548,12 +548,26 @@ void ClearResources(PDev *pdev)
     }
 }
 
+/*
+ * Tell the spice server where to look for updates to the monitor configuration.
+ */
+void InitMonitorConfig(PDev *pdev)
+{
+    size_t monitor_config_size   = sizeof(QXLMonitorsConfig) + sizeof(QXLHead);
+
+    pdev->monitor_config      = AllocMem(pdev, MSPACE_TYPE_DEVRAM, monitor_config_size);
+    RtlZeroMemory(pdev->monitor_config, monitor_config_size);
+
+    *pdev->monitor_config_pa  = PA(pdev, pdev->monitor_config, pdev->main_mem_slot);
+}
+
 void InitResources(PDev *pdev)
 {
     DEBUG_PRINT((pdev, 3, "%s: entry\n", __FUNCTION__));
 
     InitSurfaces(pdev);
     InitDeviceMemoryResources(pdev);
+    InitMonitorConfig(pdev);
 
     pdev->update_id = *pdev->dev_update_id;
 

@@ -180,6 +180,7 @@ typedef enum {
     ASYNCABLE_DESTROY_SURFACE,
     ASYNCABLE_DESTROY_ALL_SURFACES,
     ASYNCABLE_FLUSH_SURFACES,
+    ASYNCABLE_MONITOR_CONFIG,
 
     ASYNCABLE_COUNT
 } asyncable_t;
@@ -348,6 +349,9 @@ typedef struct PDev {
 
 
     UCHAR  pci_revision;
+
+    QXLMonitorsConfig * monitor_config;
+    QXLPHYSICAL * monitor_config_pa;
 
 #ifdef DBG
     int num_free_pages;

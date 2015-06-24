@@ -253,6 +253,25 @@ BOOL DrvEnableDriver(ULONG engine_version, ULONG enable_data_size, PDRVENABLEDAT
     return TRUE;
 }
 
+static void SetMonitorConfig(PDev *pdev,    QXLHead * esc_config)
+{
+    QXLHead             *heads;
+
+    pdev->monitor_config->count = 1;
+    pdev->monitor_config->max_allowed = 1;
+
+    heads = &pdev->monitor_config->heads[0];
+    heads->id = 0;
+    heads->surface_id = 0;
+    heads->x = esc_config->x;
+    heads->y = esc_config->y;
+    heads->width = esc_config->width;
+    heads->height = esc_config->height;
+    DEBUG_PRINT((pdev, 2, "%s Monitor %d (%d, %d) (%d x %d)\n",
+        __FUNCTION__, pdev->dev_id, heads->x, heads->y, heads->width, heads->height));
+    async_io(pdev, ASYNCABLE_MONITOR_CONFIG, 0);
+}
+
 ULONG DrvEscape(SURFOBJ *pso, ULONG iEsc, ULONG cjIn, PVOID pvIn,
                 ULONG cjOut, PVOID pvOut)
 {
@@ -272,6 +291,16 @@ ULONG DrvEscape(SURFOBJ *pso, ULONG iEsc, ULONG cjIn, PVOID pvIn,
             DEBUG_PRINT((pdev, 0, "%s: IOCTL_QXL_SET_CUSTOM_DISPLAY failed\n", __FUNCTION__));
             break;
         }
+        RetVal = 1;
+        break;
+    }
+    case QXL_ESCAPE_MONITOR_CONFIG: {
+        ULONG length;
+        DEBUG_PRINT((pdev, 2, "%s - 0x%p \n", __FUNCTION__, pdev));
+        if (pdev == NULL || cjIn != sizeof(QXLHead))
+            break;
+
+        SetMonitorConfig(pdev, (QXLHead * )pvIn);
         RetVal = 1;
         break;
     }
@@ -774,6 +803,9 @@ static BOOL PrepareHardware(PDev *pdev)
     pdev->asyncable[ASYNCABLE_FLUSH_SURFACES][ASYNC] = dev_info.flush_surfaces_async_port;
     pdev->asyncable[ASYNCABLE_FLUSH_SURFACES][SYNC] = NULL;
 
+    pdev->asyncable[ASYNCABLE_MONITOR_CONFIG][ASYNC] = dev_info.monitors_config_port;
+    pdev->asyncable[ASYNCABLE_MONITOR_CONFIG][SYNC] = NULL;
+
     pdev->display_event = dev_info.display_event;
     pdev->cursor_event = dev_info.cursor_event;
     pdev->sleep_event = dev_info.sleep_event;
@@ -847,6 +879,7 @@ static BOOL PrepareHardware(PDev *pdev)
     DEBUG_PRINT((pdev, 1, "%s: create_non_primary_surfaces = %d\n", __FUNCTION__,
                  pdev->create_non_primary_surfaces));
 
+    pdev->monitor_config_pa = dev_info.monitors_config;
     CreateVRamSlot(pdev);
 
     DEBUG_PRINT((NULL, 1, "%s: 0x%lx exit: 0x%lx %ul\n", __FUNCTION__, pdev,

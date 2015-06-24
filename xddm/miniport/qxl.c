@@ -1246,6 +1246,7 @@ BOOLEAN StartIO(PVOID dev_extension, PVIDEO_REQUEST_PACKET packet)
             driver_info->destroy_primary_port = dev_ext->io_port + QXL_IO_DESTROY_PRIMARY;
             driver_info->memslot_add_port = dev_ext->io_port + QXL_IO_MEMSLOT_ADD;
             driver_info->memslot_del_port = dev_ext->io_port + QXL_IO_MEMSLOT_DEL;
+            driver_info->monitors_config_port = dev_ext->io_port + QXL_IO_MONITORS_CONFIG_ASYNC;
 
             driver_info->primary_surface_create = &dev_ext->ram_header->create_surface;
 
@@ -1256,6 +1257,8 @@ BOOLEAN StartIO(PVOID dev_extension, PVIDEO_REQUEST_PACKET packet)
             driver_info->dev_id = dev_ext->rom->id;
 
             driver_info->create_non_primary_surfaces = check_non_primary_surfaces_registry_key(dev_ext);
+
+            driver_info->monitors_config = &dev_ext->ram_header->monitors_config;
         }
         break;
 
