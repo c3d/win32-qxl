@@ -60,8 +60,6 @@
 #define QUIC_VERSION_MINOR 1U
 #define QUIC_VERSION ((QUIC_VERSION_MAJOR << 16) | (QUIC_VERSION_MAJOR & 0xffff))
 
-#define ABS(a) ((a) >= 0 ? (a) : -(a))
-
 #ifdef ASSERT
 #undef ASSERT
 #endif

@@ -21,9 +21,7 @@
 
 #ifndef _H_UTILS
 #define _H_UTILS
-
-#define MIN(x, y) (((x) <= (y)) ? (x) : (y))
-#define MAX(x, y) (((x) >= (y)) ? (x) : (y))
+#include <spice/macros.h>
 #define ALIGN(a, b) (((a) + ((b) - 1)) & ~((b) - 1))
 
 
