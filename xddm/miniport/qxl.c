@@ -596,6 +596,7 @@ VP_STATUS InitModes(QXLExtension *dev)
     ULONG n_modes;
     ULONG i;
     VP_STATUS error;
+    ULONG custom_mode_id = 0;
 
     PAGED_CODE();
     DEBUG_PRINT((dev, 0, "%s\n", __FUNCTION__));
@@ -632,6 +633,11 @@ VP_STATUS InitModes(QXLExtension *dev)
             return error;
         }
     }
+    /*  Mode ids are increasing in the buffer but may not be consecutive,
+     *  so set the first custom id to be 1 larger than the last id in the buffer.
+     *  (ModeIndex isn't really an index, it is an ID).
+     */
+    custom_mode_id = modes->modes[modes->n_modes-1].id + 1;
 
     /* 2 dummy modes for custom display resolution */
     /* This is necessary to bypass Windows mode index check, that
@@ -640,7 +646,7 @@ VP_STATUS InitModes(QXLExtension *dev)
 
     for (i = dev->custom_mode; i <= dev->custom_mode + 1; ++i) {
         memcpy(&modes_info[i], &modes_info[0], sizeof(VIDEO_MODE_INFORMATION));
-        modes_info[i].ModeIndex = i;
+        modes_info[i].ModeIndex = custom_mode_id++;
     }
 
     dev->n_modes = n_modes;
@@ -1002,6 +1008,7 @@ static VP_STATUS SetCustomDisplay(QXLExtension *dev_ext, QXLEscapeSetCustomDispl
     uint32_t xres = custom_display->xres;
     uint32_t yres = custom_display->yres;
     uint32_t bpp = custom_display->bpp;
+    PVIDEO_MODE_INFORMATION pMode;
 
     /* alternate custom mode index */
     if (dev_ext->custom_mode == (dev_ext->n_modes - 1))
@@ -1014,11 +1021,11 @@ static VP_STATUS SetCustomDisplay(QXLExtension *dev_ext, QXLEscapeSetCustomDispl
                     __FUNCTION__, xres, yres, bpp, dev_ext->rom->surface0_area_size));
         return ERROR_NOT_ENOUGH_MEMORY;
     }
-
-    ret = FillVidModeInfo(&dev_ext->modes[dev_ext->custom_mode],
+    pMode = &dev_ext->modes[dev_ext->custom_mode];
+    ret = FillVidModeInfo(pMode,
                           custom_display->xres, custom_display->yres,
                           custom_display->bpp,
-                          dev_ext->custom_mode);
+                          pMode->ModeIndex);
     DEBUG_PRINT((dev_ext, 0, "%s: Returning %d\n", __FUNCTION__, ret));
     return ret;
 }
